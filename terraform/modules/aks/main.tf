@@ -1,7 +1,8 @@
 resource "azurerm_kubernetes_cluster" "k8s" {
-  location            = var.resource_group_name
+  location            = var.resource_group_location
   name                = var.cluster_name
-  resource_group_name = var.resource_group_location
+  resource_group_name = var.resource_group_name
+  dns_prefix          = var.cluster_name
 
   default_node_pool {
     name       = "default"

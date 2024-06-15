@@ -91,7 +91,7 @@ locals {
   backend_config = {
     "azure" = {
       # TODO Need to create service principal, but it requires some permissions
-      
+
       # client_id            = "${try(local.secret_vars.CLIENT_ID, null)}"
       # client_secret        = "${try(local.secret_vars.CLIENT_SECRET, null)}"
       tenant_id            = "${try(local.secret_vars.TENANT_ID, null)}"

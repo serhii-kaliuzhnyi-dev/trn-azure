@@ -7,14 +7,14 @@ terraform {
 # Include the root 'terragrunt.hcl' configuration. The root configuration contains settings that are common across all
 # components and environments, such as how to configure remote state.
 include "root" {
-  path    = find_in_parent_folders()
-  expose  = true
+  path   = find_in_parent_folders()
+  expose = true
 }
 
 # Include the 'provider.hcl'. This file contains provider blocks generation and configuration.
 include "provider" {
-  path    = find_in_parent_folders("provider.hcl")
-  expose  = true
+  path   = find_in_parent_folders("provider.hcl")
+  expose = true
 }
 
 # Set module dependencies
