@@ -1,2 +1,2 @@
 # trn-azure
-Training project based on azure cloud with usage of raw terraform
+Training project based on azure cloud with usage of raw terraform.
