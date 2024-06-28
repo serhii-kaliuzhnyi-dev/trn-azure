@@ -14,7 +14,7 @@ resource "azurerm_consumption_budget_subscription" "budget" {
   }
 
   notification {
-    threshold    = 90
+    threshold    = 80
     operator     = "GreaterThan"
     threshold_type = "Actual"
     contact_emails = var.contact_emails
