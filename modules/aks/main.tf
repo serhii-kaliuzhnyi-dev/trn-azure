@@ -10,6 +10,8 @@ resource "azurerm_kubernetes_cluster" "k8s" {
     node_count = var.node_count
   }
 
+  sku_tier = "Standard"
+  
   identity {
     type = "SystemAssigned"
   }
@@ -19,5 +21,13 @@ resource "azurerm_kubernetes_cluster" "k8s" {
     load_balancer_sku = "standard"
   }
 
-  depends_on = [ var.resource_group_name ]
+  azure_active_directory_role_based_access_control {
+    managed     = true
+    tenant_id             = var.aad_tenant_id
+    admin_group_object_ids = [
+      var.admin_group_object_id
+    ]
+  }
+
+  oidc_issuer_enabled = var.oidc_issuer_enabled
 }

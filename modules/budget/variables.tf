@@ -7,7 +7,7 @@ variable "budgets" {
   description = "A map of budgets with their respective amounts."
   type        = map(number)
   default     = {
-    MonthlyBudget = 50
+    MonthlyBudget = 10
   }
 }
 
@@ -38,5 +38,5 @@ variable "time_period_start_date" {
 variable "time_period_end_date" {
   description = "The end date for the budget period."
   type        = string
-  default     = "2024-07-01T00:00:00Z"
+  default     = "2024-08-01T00:00:00Z"
 }
