@@ -31,12 +31,6 @@ module "aks" {
   admin_group_object_id = var.admin_group_object_id
 }
 
-module "flux" {
-  source = "./modules/flux"
-  depends_on = [module.aks]
-}
-
-
 # module "budget" {
 #   source = "./modules/budget"
 
@@ -50,6 +44,15 @@ module "acr" {
   resource_group_name = module.backend.resource_group_name
   location            = module.backend.resource_group_location
 }
+
+module "flux" {
+  source = "./modules/flux"
+  acr_login_server = module.acr.acr_login_server
+  acr_admin_username = module.acr.acr_admin_username
+  acr_admin_password = module.acr.acr_admin_password
+  depends_on = [module.aks, module.acr]
+}
+
 
 module "github" {
   source             = "./modules/github"

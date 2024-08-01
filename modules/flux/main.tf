@@ -8,6 +8,12 @@ resource "kubernetes_namespace" "flux_system" {
   }
 }
 
+resource "kubernetes_namespace" "application" {
+  metadata {
+    name = "application"
+  }
+}
+
 resource "tls_private_key" "flux" {
   algorithm   = "ECDSA"
   ecdsa_curve = "P256"
@@ -72,4 +78,57 @@ resource "helm_release" "flux2_sync" {
   }
 
   depends_on = [helm_release.flux2, kubernetes_secret.flux_github_deploy]
+}
+
+resource "helm_release" "flux2_sync_canary" {
+  name       = "flux2-sync-canary"
+  repository = "https://fluxcd-community.github.io/helm-charts"
+  chart      = "flux2-sync"
+  version    = "1.9.0"
+  namespace  = kubernetes_namespace.flux_system.metadata[0].name
+
+  set {
+    name  = "gitRepository.spec.url"
+    value = "ssh://git@github.com/serhii-kaliuzhnyi-dev/go-server-canary.git"
+  }
+
+  set {
+    name  = "gitRepository.spec.ref.branch"
+    value = "canary"
+  }
+
+  set {
+    name  = "gitRepository.spec.secretRef.name"
+    value = kubernetes_secret.flux_github_deploy.metadata[0].name
+  }
+
+  set {
+    name  = "gitRepository.spec.interval"
+    value = "1m"
+  }
+
+  depends_on = [helm_release.flux2, kubernetes_secret.flux_github_deploy]
+}
+
+resource "kubernetes_secret" "acr_secret" {
+  depends_on = [kubernetes_namespace.application]
+
+  metadata {
+    name      = "acr-secret"
+    namespace = "application"
+  }
+
+  data = {
+    ".dockerconfigjson" = base64encode(jsonencode({
+      auths = {
+        "${var.acr_login_server}" = {
+          username = var.acr_admin_username
+          password = var.acr_admin_password
+          email    = "not@val.id"
+        }
+      }
+    }))
+  }
+
+  type = "kubernetes.io/dockerconfigjson"
 }
