@@ -8,12 +8,6 @@ resource "kubernetes_namespace" "flux_system" {
   }
 }
 
-resource "kubernetes_namespace" "application" {
-  metadata {
-    name = "application"
-  }
-}
-
 resource "tls_private_key" "flux" {
   algorithm   = "ECDSA"
   ecdsa_curve = "P256"
@@ -111,15 +105,13 @@ resource "helm_release" "flux2_sync_canary" {
 }
 
 resource "kubernetes_secret" "acr_secret" {
-  depends_on = [kubernetes_namespace.application]
-
   metadata {
     name      = "acr-secret"
-    namespace = "application"
+    namespace = "default"
   }
 
   data = {
-    ".dockerconfigjson" = base64encode(jsonencode({
+    ".dockerconfigjson" = jsonencode({
       auths = {
         "${var.acr_login_server}" = {
           username = var.acr_admin_username
@@ -127,7 +119,7 @@ resource "kubernetes_secret" "acr_secret" {
           email    = "not@val.id"
         }
       }
-    }))
+    })
   }
 
   type = "kubernetes.io/dockerconfigjson"

@@ -4,4 +4,8 @@ resource "azurerm_container_registry" "acr" {
   location            = var.location
   sku                 = "Basic"
   admin_enabled       = true
+
+  # lifecycle {
+  #   prevent_destroy = true
+  # }
 }
