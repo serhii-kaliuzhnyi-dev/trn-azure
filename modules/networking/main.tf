@@ -1,69 +1,47 @@
 resource "azurerm_virtual_network" "vnet" {
-  name                = "vnet"
-  address_space       = ["10.0.0.0/16"]
+  name                = var.name
+  address_space       = [var.address_space]
   location            = var.location
   resource_group_name = var.resource_group_name
 
-  depends_on = [ var.resource_group_name ]
+  subnet {
+    name = "${var.name}_subnet"
+    address_prefixes = [cidrsubnet(var.address_space, 8, 0)]
+  }
+
+  depends_on = [var.resource_group_name]
 }
 
-resource "azurerm_subnet" "subnet" {
-  name                 = "public_subnet"
-  resource_group_name  = var.resource_group_name
-  virtual_network_name = azurerm_virtual_network.vnet.name
-  address_prefixes     = ["10.0.0.0/24"]
-
-  depends_on = [ var.resource_group_name ]
-}
-
-resource "azurerm_network_interface" "nic" {
-  name                = "nic"
+resource "azurerm_network_security_group" "nsg" {
+  name                = "${var.name}_nsg"
   location            = var.location
   resource_group_name = var.resource_group_name
 
-  ip_configuration {
-    name                          = "internal"
-    subnet_id                     = azurerm_subnet.subnet.id
-    private_ip_address_allocation = "Dynamic"
+  security_rule {
+    name                       = "Ssh"
+    priority                   = 100
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "*"
+    source_address_prefix      = "*"
+    destination_address_prefix = "*"
   }
 
   depends_on = [ var.resource_group_name ]
 }
 
-resource "azurerm_network_security_group" "nsg" {
-  name                = "nsg"
-  location            = var.location
-  resource_group_name = var.resource_group_name
+resource "azurerm_subnet_network_security_group_association" "nsg_association" {
+  for_each = {
+    for subnet in azurerm_virtual_network.vnet.subnet : subnet.name => subnet.id
+  }
 
-  depends_on = [ var.resource_group_name ]
-}
-
-resource "azurerm_network_security_rule" "allow_ssh" {
-  name                        = "allow_ssh"
-  priority                    = 1001
-  direction                   = "Inbound"
-  access                      = "Allow"
-  protocol                    = "Tcp"
-  source_port_range           = "*"
-  destination_port_range      = "22"
-  source_address_prefix       = "*"
-  destination_address_prefix  = "*"
-  network_security_group_name = azurerm_network_security_group.nsg.name
-  resource_group_name         = var.resource_group_name
-
-  depends_on = [ var.resource_group_name ]
-}
-
-resource "azurerm_public_ip" "pip" {
-  name                = "public"
-  location            = var.location
-  resource_group_name = var.resource_group_name
-  allocation_method   = "Dynamic"
-
-  depends_on = [ var.resource_group_name ]
-}
-
-resource "azurerm_network_interface_security_group_association" "nsg_association" {
-  network_interface_id      = azurerm_network_interface.nic.id
+  subnet_id                 = each.value
   network_security_group_id = azurerm_network_security_group.nsg.id
+
+  depends_on = [ 
+    azurerm_virtual_network.vnet,
+    azurerm_network_security_group.nsg
+  ]
 }
