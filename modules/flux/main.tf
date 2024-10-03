@@ -48,7 +48,7 @@ resource "helm_release" "flux2_sync" {
   name       = "flux2-sync"
   repository = "https://fluxcd-community.github.io/helm-charts"
   chart      = "flux2-sync"
-  version    = "1.9.0"
+  version    = "1.10.0"
   namespace  = kubernetes_namespace.flux_system.metadata[0].name
 
   set {
@@ -78,7 +78,7 @@ resource "helm_release" "flux2_sync_canary" {
   name       = "flux2-sync-canary"
   repository = "https://fluxcd-community.github.io/helm-charts"
   chart      = "flux2-sync"
-  version    = "1.9.0"
+  version    = "1.10.0"
   namespace  = kubernetes_namespace.flux_system.metadata[0].name
 
   set {
