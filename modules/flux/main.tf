@@ -38,7 +38,7 @@ resource "helm_release" "flux2" {
   name       = "flux2"
   repository = "https://fluxcd-community.github.io/helm-charts"
   chart      = "flux2"
-  version    = "2.13.0"
+  version    = "2.14.0"
   namespace  = kubernetes_namespace.flux_system.metadata[0].name
 
   depends_on = [kubernetes_namespace.flux_system]
